@@ -1,7 +1,9 @@
 import pytest
+from saichallenger.common.sai import Sai
 from saichallenger.common.sai_data import SaiObjType
 
 NULL_OID = "oid:0x0"
+
 
 @pytest.fixture(scope="module", autouse=True)
 def skip_all(testbed_instance):
@@ -10,37 +12,16 @@ def skip_all(testbed_instance):
         pytest.skip('invalid for "{}" testbed'.format(testbed.name))
 
 
-def get_port_serdes_oid(phy, port_oid):
-    status, data = phy.get_by_type(
-        port_oid,
-        "SAI_PORT_ATTR_PORT_SERDES_ID",
-        "sai_object_id_t",
-        do_assert=False,
+@pytest.fixture
+def port_serdes_oid(phy):
+    serdes_oid = phy.create(
+        SaiObjType.PORT_SERDES,
+        [
+            "SAI_PORT_SERDES_ATTR_PORT_ID", phy.port_oids[0],
+        ],
     )
-    assert status == "SAI_STATUS_SUCCESS"
-    return data.oid()
-
-
-def get_serdes_port_oid(phy, serdes_oid):
-    status, data = phy.get_by_type(
-        serdes_oid,
-        "SAI_PORT_SERDES_ATTR_PORT_ID",
-        "sai_object_id_t",
-        do_assert=False,
-    )
-    assert status == "SAI_STATUS_SUCCESS"
-    return data.oid()
-
-
-def get_s32_list(phy, oid, attr):
-    status, data = phy.get_by_type(
-        oid,
-        attr,
-        "sai_s32_list_t",
-        do_assert=False,
-    )
-    assert status == "SAI_STATUS_SUCCESS"
-    return data.to_list()
+    yield serdes_oid
+    phy.remove(serdes_oid)
 
 
 def find_port_by_lane_count(phy, lane_count):
@@ -60,24 +41,12 @@ def find_port_by_lane_count(phy, lane_count):
     pytest.skip(f"PHY does not have a {lane_count}-lane port")
 
 
-def make_list(values):
-    return f"{len(values)}:" + ",".join(str(value) for value in values)
-
-
 def create_serdes(phy, port_oid, lane_count, do_assert=True):
-    preemphasis = list(range(1, lane_count + 1))
-    tx_fir_pre1 = [-1] * lane_count
-    tx_fir_main = [10] * lane_count
-
     attrs = [
-        "SAI_PORT_SERDES_ATTR_PORT_ID",
-        port_oid,
-        "SAI_PORT_SERDES_ATTR_PREEMPHASIS",
-        make_list(preemphasis),
-        "SAI_PORT_SERDES_ATTR_TX_FIR_PRE1",
-        make_list(tx_fir_pre1),
-        "SAI_PORT_SERDES_ATTR_TX_FIR_MAIN",
-        make_list(tx_fir_main),
+        "SAI_PORT_SERDES_ATTR_PORT_ID", port_oid,
+        "SAI_PORT_SERDES_ATTR_PREEMPHASIS", phy.make_list(lane_count, "1"),
+        "SAI_PORT_SERDES_ATTR_TX_FIR_PRE1", phy.make_list(lane_count, "-1"),
+        "SAI_PORT_SERDES_ATTR_TX_FIR_MAIN", phy.make_list(lane_count, "10"),
     ]
 
     result = phy.create(
@@ -87,25 +56,54 @@ def create_serdes(phy, port_oid, lane_count, do_assert=True):
     )
 
     return result, {
-        "SAI_PORT_SERDES_ATTR_PREEMPHASIS":
-            [str(value) for value in preemphasis],
-        "SAI_PORT_SERDES_ATTR_TX_FIR_PRE1":
-            [str(value) for value in tx_fir_pre1],
-        "SAI_PORT_SERDES_ATTR_TX_FIR_MAIN":
-            [str(value) for value in tx_fir_main],
+        "SAI_PORT_SERDES_ATTR_PREEMPHASIS": ["1"] * lane_count,
+        "SAI_PORT_SERDES_ATTR_TX_FIR_PRE1": ["-1"] * lane_count,
+        "SAI_PORT_SERDES_ATTR_TX_FIR_MAIN": ["10"] * lane_count,
     }
+
+UNSUPPORTED_GET_ATTRS = {
+    "SAI_PORT_SERDES_ATTR_CUSTOM_COLLECTION",
+    "SAI_PORT_SERDES_ATTR_RX_FFE_TAPS_LIST",
+    "SAI_PORT_SERDES_ATTR_TX_FIR_TAPS_LIST",
+    "SAI_PORT_SERDES_ATTR_RX_DFE_TAPS_LIST",
+}
+
+port_serdes_attrs = [
+    (attr, attr_type)
+    for attr, attr_type in Sai.get_obj_attrs(SaiObjType.PORT_SERDES)
+    if attr not in UNSUPPORTED_GET_ATTRS
+]
+
+@pytest.mark.parametrize(
+    "attr,attr_type",
+    port_serdes_attrs,
+)
+def test_get_attr(phy, port_serdes_oid, attr, attr_type):
+    status, _ = phy.get_by_type(
+        port_serdes_oid,
+        attr,
+        attr_type,
+        do_assert=False,
+    )
+    phy.assert_status_success(status)
 
 
 def test_initial_port_serdes_id_is_null(phy):
     for port_oid in phy.port_oids:
-        assert get_port_serdes_oid(phy, port_oid) == NULL_OID
+        assert phy.get(
+            port_oid,
+            ["SAI_PORT_ATTR_PORT_SERDES_ID"],
+        ).oid() == NULL_OID
 
 
 @pytest.mark.parametrize("lane_count", [1, 2, 4])
 def test_create_get_remove_port_serdes(phy, lane_count):
     port_oid = find_port_by_lane_count(phy, lane_count)
 
-    assert get_port_serdes_oid(phy, port_oid) == NULL_OID
+    assert phy.get(
+        port_oid,
+        ["SAI_PORT_ATTR_PORT_SERDES_ID"],
+    ).oid() == NULL_OID
 
     serdes_oid, expected_attrs = create_serdes(
         phy,
@@ -115,20 +113,29 @@ def test_create_get_remove_port_serdes(phy, lane_count):
 
     try:
         # SERDES points to its port.
-        assert get_serdes_port_oid(phy, serdes_oid) == port_oid
+        assert phy.get(
+            serdes_oid,
+            ["SAI_PORT_SERDES_ATTR_PORT_ID"],
+        ).oid() == port_oid
 
         # Port points back to its SERDES.
-        assert get_port_serdes_oid(phy, port_oid) == serdes_oid
+        assert phy.get(
+            port_oid,
+            ["SAI_PORT_ATTR_PORT_SERDES_ID"],
+        ).oid() == serdes_oid
 
         # CREATE_ONLY lane attributes were persisted correctly.
         for attr, expected_value in expected_attrs.items():
-            assert get_s32_list(phy, serdes_oid, attr) == expected_value
+            assert phy.get(serdes_oid, [attr]).to_list() == expected_value
     finally:
         status = phy.remove(serdes_oid, do_assert=False)
         assert status == "SAI_STATUS_SUCCESS"
 
     # Removing SERDES must clear the port back-reference.
-    assert get_port_serdes_oid(phy, port_oid) == NULL_OID
+    assert phy.get(
+        port_oid,
+        ["SAI_PORT_ATTR_PORT_SERDES_ID"],
+    ).oid() == NULL_OID
 
 
 @pytest.mark.xfail(
@@ -153,8 +160,7 @@ def test_create_port_serdes_with_invalid_port_id_fails(phy):
     status, _ = phy.create(
         SaiObjType.PORT_SERDES,
         [
-            "SAI_PORT_SERDES_ATTR_PORT_ID",
-            NULL_OID,
+            "SAI_PORT_SERDES_ATTR_PORT_ID", NULL_OID,
         ],
         do_assert=False,
     )
@@ -171,8 +177,7 @@ def test_create_second_serdes_for_same_port_fails(phy):
     first_serdes_oid = phy.create(
         SaiObjType.PORT_SERDES,
         [
-            "SAI_PORT_SERDES_ATTR_PORT_ID",
-            port_oid,
+            "SAI_PORT_SERDES_ATTR_PORT_ID", port_oid,
         ],
     )
 
@@ -180,18 +185,23 @@ def test_create_second_serdes_for_same_port_fails(phy):
         status, _ = phy.create(
             SaiObjType.PORT_SERDES,
             [
-                "SAI_PORT_SERDES_ATTR_PORT_ID",
-                port_oid,
+                "SAI_PORT_SERDES_ATTR_PORT_ID", port_oid,
             ],
             do_assert=False,
         )
 
         assert status == "SAI_STATUS_OBJECT_IN_USE"
-        assert get_port_serdes_oid(phy, port_oid) == first_serdes_oid
+        assert phy.get(
+            port_oid,
+            ["SAI_PORT_ATTR_PORT_SERDES_ID"],
+        ).oid() == first_serdes_oid
     finally:
         phy.remove(first_serdes_oid)
 
-    assert get_port_serdes_oid(phy, port_oid) == NULL_OID
+    assert phy.get(
+        port_oid,
+        ["SAI_PORT_ATTR_PORT_SERDES_ID"],
+    ).oid() == NULL_OID
 
 
 def test_set_port_id_after_serdes_create_fails(phy):
@@ -204,8 +214,7 @@ def test_set_port_id_after_serdes_create_fails(phy):
     serdes_oid = phy.create(
         SaiObjType.PORT_SERDES,
         [
-            "SAI_PORT_SERDES_ATTR_PORT_ID",
-            port_oid,
+            "SAI_PORT_SERDES_ATTR_PORT_ID", port_oid,
         ],
     )
 
@@ -213,14 +222,16 @@ def test_set_port_id_after_serdes_create_fails(phy):
         status = phy.set(
             serdes_oid,
             [
-                "SAI_PORT_SERDES_ATTR_PORT_ID",
-                another_port_oid,
+                "SAI_PORT_SERDES_ATTR_PORT_ID", another_port_oid,
             ],
             do_assert=False,
         )
 
         assert status == "SAI_STATUS_INVALID_ATTRIBUTE_0"
-        assert get_serdes_port_oid(phy, serdes_oid) == port_oid
+        assert phy.get(
+            serdes_oid,
+            ["SAI_PORT_SERDES_ATTR_PORT_ID"],
+        ).oid() == port_oid
     finally:
         phy.remove(serdes_oid)
 
@@ -240,8 +251,7 @@ def test_set_create_only_lane_attribute_fails(phy):
     serdes_oid = phy.create(
         SaiObjType.PORT_SERDES,
         [
-            "SAI_PORT_SERDES_ATTR_PORT_ID",
-            port_oid,
+            "SAI_PORT_SERDES_ATTR_PORT_ID", port_oid,
         ],
     )
 
@@ -250,7 +260,7 @@ def test_set_create_only_lane_attribute_fails(phy):
             serdes_oid,
             [
                 "SAI_PORT_SERDES_ATTR_TX_FIR_MAIN",
-                make_list([10] * lane_count),
+                phy.make_list(lane_count, "10"),
             ],
             do_assert=False,
         )
@@ -264,8 +274,8 @@ def test_remove_port_referenced_by_serdes_fails(phy):
     port_oid = phy.create(
         SaiObjType.PORT,
         [
-            "SAI_PORT_ATTR_HW_LANE_LIST", "1:10000",
-            "SAI_PORT_ATTR_SPEED", "100000",
+            "SAI_PORT_ATTR_HW_LANE_LIST", "1:1",
+            "SAI_PORT_ATTR_SPEED", "25000",
             "SAI_PORT_ATTR_AUTO_NEG_MODE", "false",
             "SAI_PORT_ATTR_FEC_MODE", "SAI_PORT_FEC_MODE_NONE",
         ],
@@ -277,8 +287,7 @@ def test_remove_port_referenced_by_serdes_fails(phy):
         serdes_oid = phy.create(
             SaiObjType.PORT_SERDES,
             [
-                "SAI_PORT_SERDES_ATTR_PORT_ID",
-                port_oid,
+                "SAI_PORT_SERDES_ATTR_PORT_ID", port_oid,
             ],
         )
 
