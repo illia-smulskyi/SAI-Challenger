@@ -58,10 +58,10 @@ def test_get_port_connector_attributes(phy, connector_oid):
 
 
 @pytest.mark.xfail(
-    reason="ValidateOnCreate does not check MANDATORY_ON_CREATE",
+    reason="PORT_CONNECTOR creation succeeds with missing mandatory attributes",
     strict=True,
 )
-def test_create_without_required_attributes_fails(phy):
+def test_create_without_mandatory_attributes_fails(phy):
     status, oid = phy.create(
         SaiObjType.PORT_CONNECTOR,
         [],
@@ -76,7 +76,7 @@ def test_create_without_required_attributes_fails(phy):
 
 
 @pytest.mark.xfail(
-    reason="ValidateOnCreate does not check MANDATORY_ON_CREATE",
+    reason="PORT_CONNECTOR creation succeeds with missing mandatory attributes",
     strict=True,
 )
 @pytest.mark.parametrize(
@@ -86,7 +86,7 @@ def test_create_without_required_attributes_fails(phy):
         "SAI_PORT_CONNECTOR_ATTR_LINE_SIDE_PORT_ID",
     ],
 )
-def test_create_with_one_required_attribute_missing_fails(
+def test_create_with_one_mandatory_attribute_missing_fails(
     phy,
     missing_attr,
 ):

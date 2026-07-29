@@ -139,7 +139,7 @@ def test_create_get_remove_port_serdes(phy, lane_count):
 
 
 @pytest.mark.xfail(
-    reason="ValidateOnCreate does not check MANDATORY_ON_CREATE",
+    reason="PORT_SERDES creation succeeds without the mandatory PORT_ID attribute",
     strict=True,
 )
 def test_create_port_serdes_without_port_id_fails(phy):
