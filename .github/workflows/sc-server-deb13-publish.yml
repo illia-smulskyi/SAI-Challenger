@@ -25,7 +25,7 @@ jobs:
     name: Build SAI Challenger server image
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
     - name: Update submodules
       run: git submodule update --init
     - name: Build server Docker image
