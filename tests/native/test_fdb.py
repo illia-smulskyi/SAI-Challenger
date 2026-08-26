@@ -445,7 +445,7 @@ class TestFdbNoLearn:
         chck_pkt, tag_chck_pkt = self._reverse_pkt()
         port0_bp = self.port0_bp
         try:
-            npu.remove(port0_bp)
+            npu.remove_bridge_port(port0_bp)
             send_packet(dataplane, self.dev_port0, pkt)
             verify_packets(dataplane, tag_pkt, [self.dev_port1])
             verify_packet_any_port(dataplane, pkt, self.lag_ports)
@@ -752,7 +752,7 @@ class TestFdbLearn:
             if new_vlan_member_oid is not None:
                 npu.remove(new_vlan_member_oid)
             if new_vlan_bp is not None:
-                npu.remove(new_vlan_bp)
+                npu.remove_bridge_port(new_vlan_bp)
 
     def test_mac_learn_error(self, npu, dataplane):
         """
@@ -1029,11 +1029,11 @@ class TestFdbMacMove:
         npu.remove(request.cls._vlan10_member4)
         for lm in reversed(request.cls._lag10_members):
             npu.remove(lm)
-        npu.remove(request.cls._lag10_bp)
+        npu.remove_bridge_port(request.cls._lag10_bp)
         npu.remove(request.cls._lag10)
         npu.set(request.cls._port24_oid, ["SAI_PORT_ATTR_PORT_VLAN_ID", "0"])
         npu.remove(request.cls._vlan10_member3)
-        npu.remove(request.cls.port24_bp)
+        npu.remove_bridge_port(request.cls.port24_bp)
         npu.set(request.cls.port1, ["SAI_PORT_ATTR_PORT_VLAN_ID", "0"])
         npu.remove(request.cls._vlan10_member1_ut)
         new_member = npu.create_vlan_member(
@@ -1268,7 +1268,7 @@ class TestFdbFlush:
                 setattr(request.cls, _mbr_attr, None)
 
         if request.cls.port24_bp is not None:
-            npu.remove(request.cls.port24_bp)
+            npu.remove_bridge_port(request.cls.port24_bp)
 
         if request.cls._vlan10_member1_ut is not None:
             npu.set(request.cls.port1, ["SAI_PORT_ATTR_PORT_VLAN_ID", "0"])
@@ -2414,7 +2414,7 @@ class TestFdbAge:
             ],
         )
         npu.remove(request.cls._vlan10_member3)
-        npu.remove(request.cls._port24_bp)
+        npu.remove_bridge_port(request.cls._port24_bp)
         npu.set(request.cls._port24_oid, ["SAI_PORT_ATTR_PORT_VLAN_ID", npu.default_vlan_id])
         npu.set(npu.switch_oid, ["SAI_SWITCH_ATTR_FDB_AGING_TIME", "0"])
         npu._topo_initialized = False
@@ -2744,9 +2744,9 @@ class TestFdbMiss:
         npu.remove(request.cls._vm1)
         npu.remove(request.cls._vm2)
         npu.remove(request.cls._vlan100)
-        npu.remove(request.cls._port24_bp)
-        npu.remove(request.cls._port25_bp)
-        npu.remove(request.cls._port26_bp)
+        npu.remove_bridge_port(request.cls._port24_bp)
+        npu.remove_bridge_port(request.cls._port25_bp)
+        npu.remove_bridge_port(request.cls._port26_bp)
         npu._topo_initialized = False
 
     def _restore_unicast_fwd(self, npu):

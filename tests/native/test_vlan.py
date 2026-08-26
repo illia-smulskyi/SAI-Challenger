@@ -301,8 +301,8 @@ class TestL2Vlan:
         npu.remove(request.cls.lag_mbr31)
         npu.remove(request.cls.lag_mbr41)
 
-        npu.remove(request.cls.lag10_bp)
-        npu.remove(request.cls.lag11_bp)
+        npu.remove_bridge_port(request.cls.lag10_bp)
+        npu.remove_bridge_port(request.cls.lag11_bp)
 
         npu.remove(request.cls.lag10)
         npu.remove(request.cls.lag11)
@@ -312,14 +312,14 @@ class TestL2Vlan:
         npu.remove(request.cls.vlan60)
         npu.remove(request.cls.vlan70)
 
-        npu.remove(request.cls.topo.port31_bp)
-        npu.remove(request.cls.topo.port30_bp)
-        npu.remove(request.cls.topo.port29_bp)
-        npu.remove(request.cls.topo.port28_bp)
-        npu.remove(request.cls.topo.port27_bp)
-        npu.remove(request.cls.topo.port26_bp)
-        npu.remove(request.cls.topo.port25_bp)
-        npu.remove(request.cls.topo.port24_bp)
+        npu.remove_bridge_port(request.cls.topo.port31_bp)
+        npu.remove_bridge_port(request.cls.topo.port30_bp)
+        npu.remove_bridge_port(request.cls.topo.port29_bp)
+        npu.remove_bridge_port(request.cls.topo.port28_bp)
+        npu.remove_bridge_port(request.cls.topo.port27_bp)
+        npu.remove_bridge_port(request.cls.topo.port26_bp)
+        npu.remove_bridge_port(request.cls.topo.port25_bp)
+        npu.remove_bridge_port(request.cls.topo.port24_bp)
         npu._topo_initialized = False
 
     def _inc_vlan10_ucast(self):
@@ -1649,7 +1649,7 @@ class TestL2Vlan:
             self.npu.set(self.npu.port_oids[31], ["SAI_PORT_ATTR_PORT_VLAN_ID", "1"])
             self.npu.remove(vlan_member3)
             vlan_member3 = None
-            self.npu.remove(port31_bp_local)
+            self.npu.remove_bridge_port(port31_bp_local)
             port31_bp_local = None
             self.npu.remove(prune_lag_mbr3)
             prune_lag_mbr3 = None
@@ -1666,7 +1666,7 @@ class TestL2Vlan:
             if vlan_member3 is not None:
                 self.npu.remove(vlan_member3)
             if port31_bp_local is not None:
-                self.npu.remove(port31_bp_local)
+                self.npu.remove_bridge_port(port31_bp_local)
 
             self.npu.set(prune_lag, ["SAI_LAG_ATTR_PORT_VLAN_ID", "1"])
             if prune_lag2 is not None:
@@ -1683,9 +1683,9 @@ class TestL2Vlan:
             if prune_lag_mbr4 is not None:
                 self.npu.remove(prune_lag_mbr4)
 
-            self.npu.remove(prune_lag_bp)
+            self.npu.remove_bridge_port(prune_lag_bp)
             if prune_lag2_bp is not None:
-                self.npu.remove(prune_lag2_bp)
+                self.npu.remove_bridge_port(prune_lag2_bp)
             self.npu.remove(prune_lag)
             if prune_lag2 is not None:
                 self.npu.remove(prune_lag2)

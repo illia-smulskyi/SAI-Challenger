@@ -38,7 +38,7 @@ def config(npu):
     for oid in dot1q_mbr_oids:
         bp_type = npu.get(oid, ["SAI_BRIDGE_PORT_ATTR_TYPE", "SAI_BRIDGE_PORT_TYPE_PORT"]).value()
         if bp_type == "SAI_BRIDGE_PORT_TYPE_PORT":
-            npu.remove(oid)
+            npu.remove_bridge_port(oid)
     npu.dot1q_bp_oids.clear()
 
     # Create default routes

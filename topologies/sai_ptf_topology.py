@@ -146,7 +146,7 @@ class SaiPtfTopologyMixin:
         """Remove default 1Q bridge ports."""
         for idx in list(range(len(self.npu.port_oids))):
             bp = self.npu.dot1q_bp_oids[idx]
-            self.npu.remove(bp)
+            self.npu.remove_bridge_port(bp)
 
     def remove_default_vlan_members(self) -> None:
         """Detach all ports from the default VLAN and save them for later restore."""
@@ -313,7 +313,7 @@ class SaiPtfTopologyMixin:
     def destroy_bridge_ports(self) -> None:
         """Remove bridge ports in reverse creation order."""
         for bridge_port in reversed(self.def_bridge_port_list):
-            self.npu.remove(bridge_port)
+            self.npu.remove_bridge_port(bridge_port)
         self.def_bridge_port_list.clear()
 
     def destroy_lags_with_members(self) -> None:

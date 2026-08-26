@@ -486,7 +486,7 @@ class TestSviNeighbor:
                 npu.remove(vlan_member)
             npu.remove(vlan_oid)
             for bridge_port in reversed(bridge_ports):
-                npu.remove(bridge_port)
+                npu.remove_bridge_port(bridge_port)
 
 
 class TestCpuForward:
@@ -769,8 +769,8 @@ class L3DirBcastRouteTestHelper:
         npu.remove(request.cls.vlan100_member2)
         npu.remove(request.cls.vlan100_member1)
         npu.remove(request.cls.vlan100)
-        npu.remove(request.cls.port25_bp)
-        npu.remove(request.cls.port24_bp)
+        npu.remove_bridge_port(request.cls.port25_bp)
+        npu.remove_bridge_port(request.cls.port24_bp)
 
     def _verify_cpu_glean(self, dataplane, ingress_port, ip_dst, eth_src):
         pkt = simple_tcp_packet(

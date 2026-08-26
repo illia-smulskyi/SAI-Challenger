@@ -274,7 +274,7 @@ def test_l2_lag(npu, dataplane):
     # Remove bridge ports
     for idx in range(max_port):
         npu.remove_vlan_member(npu.default_vlan_oid, npu.dot1q_bp_oids[idx])
-        npu.remove(npu.dot1q_bp_oids[idx])
+        npu.remove_bridge_port(npu.dot1q_bp_oids[idx])
 
     # Remove Port #3 from the default VLAN
     npu.remove_vlan_member(npu.default_vlan_oid, npu.dot1q_bp_oids[3])
@@ -360,7 +360,7 @@ def test_l2_lag(npu, dataplane):
         for oid in lag_mbr_oids:
             npu.remove(oid)
 
-        npu.remove(lag_bp_oid)
+        npu.remove_bridge_port(lag_bp_oid)
         npu.remove(lag_oid)
 
         # Create bridge port for ports removed from LAG
@@ -404,7 +404,7 @@ def test_l2_lag_hash_seed(npu, dataplane):
     # Remove bridge ports
     for idx in range(lag_mbr_num):
         npu.remove_vlan_member(npu.default_vlan_oid, npu.dot1q_bp_oids[idx])
-        npu.remove(npu.dot1q_bp_oids[idx])
+        npu.remove_bridge_port(npu.dot1q_bp_oids[idx])
 
     # Remove Port #4 from the default VLAN
     npu.remove_vlan_member(npu.default_vlan_oid, npu.dot1q_bp_oids[lag_mbr_num])
@@ -546,7 +546,7 @@ def test_l2_lag_hash_seed(npu, dataplane):
         for oid in lag_mbr_oids:
             npu.remove(oid)
 
-        npu.remove(lag_bp_oid)
+        npu.remove_bridge_port(lag_bp_oid)
         npu.remove(lag_oid)
 
         # Create bridge port for ports removed from LAG

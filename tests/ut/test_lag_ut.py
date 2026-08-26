@@ -43,7 +43,7 @@ class TestLag:
         # Remove bridge ports
         for idx in range(TestLag.lag_mbr_num):
             npu.remove_vlan_member(npu.default_vlan_oid, npu.dot1q_bp_oids[idx])
-            npu.remove(npu.dot1q_bp_oids[idx])
+            npu.remove_bridge_port(npu.dot1q_bp_oids[idx])
 
         # Create LAG members
         for idx in range(TestLag.lag_mbr_num):

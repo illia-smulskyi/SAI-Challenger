@@ -180,6 +180,22 @@ class SaiNpu(Sai):
         assert vlan_mbr_oid, f"Bridge Port {bp_oid} is not a member of VLAN {vlan_oid}"
         self.remove(vlan_mbr_oid)
 
+    def remove_bridge_port(self, bp_oid):
+        """Remove a bridge port using the SAI-required teardown sequence.
+
+        Per the SAI comment on SAI_BRIDGE_PORT_ATTR_ADMIN_STATE:
+            Before removing a bridge port, need to disable it by setting admin mode 
+            to false, then flush the FDB entries, and then remove it.
+
+        This helper flushes only dynamic FDB entries for the given bridge port.
+        Static entries must be deleted by the caller beforehand.
+        """
+        self.set(bp_oid, ["SAI_BRIDGE_PORT_ATTR_ADMIN_STATE", "false"])
+        self.flush_fdb_entries(self.switch_oid, 
+                               ["SAI_FDB_FLUSH_ATTR_ENTRY_TYPE", "SAI_FDB_FLUSH_ENTRY_TYPE_DYNAMIC",
+                                "SAI_FDB_FLUSH_ATTR_BRIDGE_PORT_ID", bp_oid])
+        self.remove(bp_oid)
+
     def _route_entry_key(self, vr_oid, prefix):
         return "SAI_OBJECT_TYPE_ROUTE_ENTRY:" + json.dumps(
             {
@@ -242,7 +258,7 @@ class SaiNpu(Sai):
             oid =  self.get_vlan_member(self.default_vlan_oid, self.dot1q_bp_oids[idx])
             if oid:
                 self.remove(oid)
-            self.remove(self.dot1q_bp_oids[idx])
+            self.remove_bridge_port(self.dot1q_bp_oids[idx])
             status, data = self.get(self.port_oids[idx], ["SAI_PORT_ATTR_PORT_SERDES_ID"], do_assert=False)
             if status == "SAI_STATUS_SUCCESS" and data.oid() != "oid:0x0":
                 self.remove(data.oid())
