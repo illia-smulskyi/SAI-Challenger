@@ -87,6 +87,34 @@ Run SAI Challenger testcases and generate HTML report:
 
 **NOTE:** The option `--traffic` will be ignored when running on `saivs` target.
 
+### ZMQ SAI interface
+
+ZMQ uses the same Docker images as Redis. Select it at run time so syncd binds the sairedis ZeroMQ channel (`tcp://0.0.0.0:5555`). The client still needs Redis for VIDCOUNTER, VIDTORID, and counters.
+
+Build (same as Redis):
+```sh
+./build.sh -i client
+./build.sh -i server -a trident2 -t saivs
+```
+
+Start the server in ZMQ mode:
+```sh
+./run.sh -i client
+./run.sh -i server -a trident2 -t saivs -s zmq
+sudo ./veth-create-host.sh sc-server-trident2-saivs-run sc-client-run
+```
+
+Or:
+```sh
+./run_client_server.sh -a trident2 -t saivs -s zmq start
+```
+
+Run tests with the ZMQ testbed. Update both `ip` and `zmq_endpoint` to the server container address:
+```sh
+docker inspect -f '{{.NetworkSettings.Networks.bridge.IPAddress}}' sc-server-trident2-saivs-run
+./exec.sh -i client pytest --testbed=saivs_client_server_zmq -v -k "test_l2_basic"
+```
+
 In order to see the syncd log you need to connect to the `server`:
 ```
 docker exec -it sc-server-trident2-saivs-run bash

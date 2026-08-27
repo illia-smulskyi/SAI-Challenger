@@ -21,7 +21,7 @@ This section summarizes relevant use-case scenarios along with simple diagrams, 
 Each use-case diagram may imply multiple variations of SAI-Challenger and Device Under Test (DUT) solutions; in other words, there are many permutations of any given use-case. 
 
 ### DUT Config Variations
-The diagram portion below illustrates that SAI Challenger supports both saithrift and sairedis APIs. SAI Challenger test-cases can run over either API without change. A test configuration file selects which API to use.
+The diagram portion below illustrates that SAI Challenger supports both saithrift and sairedis APIs (Redis or ZMQ southbound). SAI Challenger test-cases can run over either API without change. A test configuration file selects which API to use.
 
 A given DUT can run, one at a time, either a saithrift RPC server (`saiserver`) or the SONiC `syncd` daemon. A test controller could execute one set of tests over saithrift (with `saiserver` running on the DUT) to verify the DUT via remote libsai calls; then execute the same tests using sairedis (with redis and syncd running on the DUT) to verify partial SONiC integration. The sonic-mgmt testbed has [instructions](https://github.com/sonic-net/sonic-mgmt/blob/master/docs/testbed/sai_quality/README.md) for executing PTF-based [sai_qualify](https://github.com/sonic-net/sonic-mgmt/tree/master/tests/sai_qualify) tests, by replacing the `syncd` container with `saiserver`. This same process should work if PTF is replaced with SAI Challenger.
 

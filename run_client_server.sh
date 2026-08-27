@@ -4,15 +4,17 @@ SAIC_HOME=.
 TG=ptf
 TARGET=saivs
 ASIC_TYPE=trident2
+SAI_INTERFACE=redis
 
-while getopts "ha:t:" OPT; do
+while getopts "ha:t:s:" OPT; do
     case ${OPT} in
     h)
         echo "Setup docker based testbed: 1) start client docker; 2) start server docker; 3) create links."
-        echo "Usage: tb_ctl.sh [-a ASIC] [-t TARGET] COMMAND"
+        echo "Usage: tb_ctl.sh [-a ASIC] [-t TARGET] [-s INTERFACE] COMMAND"
         echo -e "-h\tShow help"
         echo -e "-a\tSet ASIC. Default $ASIC_TYPE."
         echo -e "-t\tSet target. Default $TARGET."
+        echo -e "-s\tSAI interface: redis|thrift|zmq. Default redis."
         echo -e "COMMAND\tstart|stop"
         exit 0
         ;;
@@ -23,6 +25,10 @@ while getopts "ha:t:" OPT; do
     t)
         TARGET=$OPTARG
         echo "Target: ${TARGET}"
+        ;;
+    s)
+        SAI_INTERFACE=$OPTARG
+        echo "SAI interface: ${SAI_INTERFACE}"
         ;;
     *)
         echo "Invalid options"
@@ -38,14 +44,14 @@ COMMAND=${@: -1}
 }
 
 start_all() {
-    $SAIC_HOME/run.sh -i client -c start -r
-    $SAIC_HOME/run.sh -i server -c start -a $ASIC_TYPE -t $TARGET -r -p
+    $SAIC_HOME/run.sh -i client -c start -r -s $SAI_INTERFACE
+    $SAIC_HOME/run.sh -i server -c start -a $ASIC_TYPE -t $TARGET -r -p -s $SAI_INTERFACE
     sudo $SAIC_HOME/veth-create-host.sh sc-server-${ASIC_TYPE}-${TARGET}-run sc-client-run
 }
 
 stop_all() {
-  $SAIC_HOME/run.sh -i server -c stop -a $ASIC_TYPE -t $TARGET
-  $SAIC_HOME/run.sh -i client -c stop
+  $SAIC_HOME/run.sh -i server -c stop -a $ASIC_TYPE -t $TARGET -s $SAI_INTERFACE
+  $SAIC_HOME/run.sh -i client -c stop -s $SAI_INTERFACE
 }
 
 case $COMMAND in

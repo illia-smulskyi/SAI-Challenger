@@ -2,7 +2,7 @@
 
 This directory contains native pytest-based SAI Challenger tests migrated from the legacy SAI PTF suite. The tests use SAI Challenger fixtures and APIs for device configuration while retaining PTF/Scapy for dataplane packet generation and verification.
 
-Unlike legacy PTF tests, these tests configure SAI objects directly through the SAI Challenger `npu` fixture and use pytest fixtures for setup, cleanup, and failure recovery. The same test code can run through Redis or Thrift and across virtual or hardware testbeds; only the testbed configuration changes. Traffic verification remains optional, so control-plane checks can run without a dataplane connection.
+Unlike legacy PTF tests, these tests configure SAI objects directly through the SAI Challenger `npu` fixture and use pytest fixtures for setup, cleanup, and failure recovery. The same test code can run through Redis, ZMQ, or Thrift and across virtual or hardware testbeds; only the testbed configuration changes. Traffic verification remains optional, so control-plane checks can run without a dataplane connection.
 
 ## Test files
 
@@ -43,7 +43,7 @@ Before the first standalone SAIVS run, build the image and start the container:
 ```
 
 See the [standalone mode guide](../../docs/standalone_mode.md) for additional
-build options.
+build options, including `./run.sh -s zmq` with `--testbed=saivs_standalone_zmq`.
 
 Run all three modules:
 

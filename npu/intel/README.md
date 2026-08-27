@@ -19,6 +19,8 @@ Run SAI Challenger testcases:
 ./exec.sh -a tofino -t model pytest --sku=32x25g --traffic -v -k "test_l2_basic"
 ```
 
+ZMQ uses the same images. Start with `-s zmq` and a ZMQ testbed (`type: zmq` plus `zmq_endpoint`).
+
 ## Running SAI Challenger in server mode
 
 Build Docker image for ASIC `tofino` target `model`:

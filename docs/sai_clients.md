@@ -12,9 +12,10 @@ On the picture below "SAI config" is a new __unified SAI format__ that is used i
 
 <a href="url"><img src="../img/SAI-Challenger HL.svg" align="center" width="800" ></a>
 
-At this stage SAI-Challenger supports 2 SAI clients:
+At this stage SAI-Challenger supports 3 SAI clients:
 1. Redis
 2. SAI-Thrift
+3. ZMQ (sairedis ZeroMQChannel; still uses Redis for VID/ASIC_DB/counters)
 
 But it is possible to add any custom SAI client.
 
@@ -31,7 +32,8 @@ SAI clients root:
 common/
 └── sai_client
     ├── sai_redis_client [Redis client implementation]
-    │── sai_thrift_client [Thrift client implementation]
+    ├── sai_thrift_client [Thrift client implementation]
+    ├── sai_zmq_client [ZMQ client; subclasses SaiRedisClient]
     └── sai_client.py [Interface class]
 
 ```
@@ -96,6 +98,30 @@ Example of the Redis configuration:
     }
   ],
   //...
+}
+```
+
+Example of the ZMQ configuration. Redis `ip`/`port` are still required for VIDCOUNTER, VIDTORID, counters, and cleanup. Start syncd in ZMQ mode with `./run.sh -s zmq` (see [standalone](standalone_mode.md) and [client-server](client_server_mode.md)). Use `tcp://` for client-server Docker; `ipc://` only works in the same network namespace.
+
+Ready-made testbeds: `saivs_standalone_zmq` and `saivs_client_server_zmq`.
+
+```json5
+{
+  "npu": [
+    {
+      // ...
+      "client": {
+        "type": "zmq",
+        "config": {
+          "ip": "172.17.0.3",
+          "port": "6379",
+          "loglevel": "NOTICE",
+          "zmq_endpoint": "tcp://172.17.0.3:5555",
+          "zmq_timeout_ms": 60000
+        }
+      }
+    }
+  ]
 }
 ```
 

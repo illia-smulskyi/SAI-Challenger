@@ -14,6 +14,7 @@ on:
       - 'scripts/**'
       - 'configs/**'
       - 'tests/**'
+      - 'testbeds/**'
       - 'topologies/**'
       - 'setup.py'
       - 'build.sh'
@@ -88,6 +89,16 @@ jobs:
       run: ./exec.sh --no-tty pytest --testbed=saivs_standalone -v test_l2_basic_dd.py
     - name: Run API tests
       run: ./exec.sh --no-tty pytest --testbed=saivs_standalone -v api/
+
+    - name: Start SAI-C in standalone mode with SAI ZMQ
+      run: ./run.sh -i standalone -s zmq -o deb11
+    - name: Update SAI-C package
+      run: ./exec.sh --no-tty -s zmq pip3 install /sai-challenger/common /sai-challenger
+      if: ${{ env.REDIS_RPC == '0' }}
+    - name: Run ZMQ tests
+      run: ./exec.sh --no-tty -s zmq pytest --testbed=saivs_standalone_zmq -v test_l2_basic.py
+    - name: Run ZMQ unit tests
+      run: ./exec.sh --no-tty -s zmq pytest --testbed=saivs_standalone_zmq -v ut/test_acl_ut.py ut/test_bridge_ut.py ut/test_vrf_ut.py ut/test_port_ut.py ut/test_fdb_ut.py ut/test_lag_ut.py
 
     - name: Build standalone docker image with SAI thrift
       run: ./build.sh -i standalone -s thrift -o deb11

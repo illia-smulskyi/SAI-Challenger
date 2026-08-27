@@ -49,3 +49,13 @@ Run SAI Challenger testcases and generate HTML report:
 ./exec.sh -t saivs pytest --testbed=saivs_standalone -v -k "test_l2_basic" --html=report.html --self-contained-html
 ```
 
+### ZMQ SAI interface
+
+ZMQ uses the same standalone image as Redis. Pass `-s zmq` to `run.sh` so syncd listens on the ZeroMQ endpoint. Tests still use Redis on localhost for VID and counters.
+
+```sh
+./build.sh -a trident2 -t saivs
+./run.sh -a trident2 -t saivs -s zmq
+./exec.sh -t saivs pytest --testbed=saivs_standalone_zmq -v -k "test_l2_basic"
+```
+

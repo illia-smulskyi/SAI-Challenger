@@ -122,6 +122,8 @@ WORKDIR /sai-challenger
 # Setup supervisord
 COPY scripts/wait-interfaces.sh /usr/bin/wait-interfaces.sh
 COPY scripts/redis_start.sh    /usr/bin/redis_start.sh
+COPY scripts/syncd_start.sh    /usr/bin/syncd_custom_start.sh
+COPY configs/context_config.json /etc/sai.d/context_config.json
 COPY configs/server/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 CMD ["/usr/bin/supervisord"]

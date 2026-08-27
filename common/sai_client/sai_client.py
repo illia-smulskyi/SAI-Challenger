@@ -12,6 +12,10 @@ class SaiClient:
     def cleanup(self):
         raise NotImplementedError
 
+    def deinit(self):
+        """Release transport resources held by the client on session end."""
+        pass
+
     def set_loglevel(self, sai_api, loglevel):
         raise NotImplementedError
 
@@ -130,6 +134,9 @@ class SaiClient:
         if params["type"] == "redis":
             from sai_client.sai_redis_client.sai_redis_client import SaiRedisClient
             sai_client = SaiRedisClient(params["config"])
+        elif params["type"] == "zmq":
+            from sai_client.sai_zmq_client.sai_zmq_client import SaiZmqClient
+            sai_client = SaiZmqClient(params["config"])
         elif params["type"] == "thrift":
             from sai_client.sai_thrift_client.sai_thrift_client import SaiThriftClient
             sai_client = SaiThriftClient(params["config"])

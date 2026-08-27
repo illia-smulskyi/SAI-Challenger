@@ -40,7 +40,28 @@ Here is the list of mandatory attributes for each entry in the testbed configura
     }
   }
 ],
+```
 
+ZMQ uses the same Redis `ip`/`port` for VID and counters, plus `zmq_endpoint` for SAI RPC. syncd must be started with `./run.sh -s zmq`.
+
+```json5
+"npu": [
+  {
+    "alias": "vs",
+    "asic": "trident2",
+    "target": "saivs",
+    "sku": null,
+    "client": {
+      "type": "zmq",
+      "config": {
+        "ip": "172.17.0.3",
+        "port": "6379",
+        "loglevel": "NOTICE",
+        "zmq_endpoint": "tcp://172.17.0.3:5555"
+      }
+    }
+  }
+],
 ```
 
 ### The `dataplane` section

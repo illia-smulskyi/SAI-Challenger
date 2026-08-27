@@ -42,7 +42,7 @@ print-help() {
     echo "  -p Run Docker in --privileged mode"
     echo "  -n Run Docker with host networking namespace"
     echo "  -r Remove Docker after run"
-    echo "  -s [redis|thrift]"
+    echo "  -s [redis|thrift|zmq]"
     echo "     SAI interface"
     echo "  -o [bullseye|bookworm|trixie]"
     echo "     Docker image base OS"
@@ -111,6 +111,13 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
+if [[ "${SAI_INTERFACE}" != "redis" && \
+      "${SAI_INTERFACE}" != "thrift" && \
+      "${SAI_INTERFACE}" != "zmq" ]]; then
+    echo "Unknown SAI interface \"${SAI_INTERFACE}\""
+    exit 1
+fi
+
 if [[ "${IMAGE_TYPE}" != "standalone" && \
       "${IMAGE_TYPE}" != "client" && \
       "${IMAGE_TYPE}" != "server" ]]; then
@@ -178,6 +185,9 @@ start_docker_container() {
         docker pull plvisiondevs/${IMG_NAME}:${BASE_OS}-latest
         docker tag plvisiondevs/${IMG_NAME}:${BASE_OS}-latest ${IMG_NAME}:${BASE_OS}
     fi
+    # Redis and ZMQ share the same container name. Replace a leftover
+    # instance so `./run.sh -s zmq` can follow a Redis session.
+    docker rm -f ${IMG_NAME}-run >/dev/null 2>&1 || true
     docker run --name ${IMG_NAME}-run \
         --cap-add=NET_ADMIN \
         --device /dev/net/tun:/dev/net/tun \
@@ -198,6 +208,13 @@ if [ "${SAI_INTERFACE}" = "thrift" ]; then
     PREFIX="sc-thrift"
 else
     PREFIX="sc"
+fi
+
+if [ "${SAI_INTERFACE}" = "zmq" ]; then
+    OPTS="$OPTS -e SAI_INTERFACE=zmq"
+    if [ "${IMAGE_TYPE}" = "server" ] || [ "${IMAGE_TYPE}" = "standalone" ]; then
+        OPTS="$OPTS -p 5555:5555 -p 5556:5556"
+    fi
 fi
 
 

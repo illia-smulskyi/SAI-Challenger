@@ -5,8 +5,12 @@
 
 CMD=/usr/bin/syncd
 CMD_ARGS=
-# Set synchronous mode
-CMD_ARGS+=" -s"
+if [ "${SAI_INTERFACE}" = "zmq" ]; then
+    CMD_ARGS+=" -z zmq_sync"
+else
+    # Set synchronous mode
+    CMD_ARGS+=" -s"
+fi
 # Use bulk APIs in SAI
 CMD_ARGS+=" -l"
 
@@ -24,6 +28,10 @@ config_syncd()
         echo "SAI_BFN_MODEL=1" >> $PROFILE_FILE
     fi
     CMD_ARGS+=" -p $PROFILE_FILE"
+
+    if [ "${SAI_INTERFACE}" = "zmq" ] && [ -f /etc/sai.d/context_config.json ]; then
+        CMD_ARGS+=" -x /etc/sai.d/context_config.json"
+    fi
 
     # Check and load SDE profile
     #P4_PROFILE="x2_profile"

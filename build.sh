@@ -38,8 +38,8 @@ print-help() {
     echo "     ASIC to be tested"
     echo "  -t TARGET"
     echo "     Target device with this NPU"
-    echo "  -s [redis|thrift]"
-    echo "     SAI interface"
+    echo "  -s [redis|thrift|zmq]"
+    echo "     SAI interface (zmq uses the redis image; pass -s zmq to run.sh)"
     echo "  -o [bullseye|bookworm|trixie]"
     echo "     Docker image base OS"
     echo "  -g [uname git_hub_token]"
@@ -88,6 +88,13 @@ while [[ $# -gt 0 ]]; do
     esac
     shift
 done
+
+if [[ "${SAI_INTERFACE}" != "redis" && \
+      "${SAI_INTERFACE}" != "thrift" && \
+      "${SAI_INTERFACE}" != "zmq" ]]; then
+    echo "Unknown SAI interface \"${SAI_INTERFACE}\""
+    exit 1
+fi
 
 if [[ "${IMAGE_TYPE}" != "standalone" && \
       "${IMAGE_TYPE}" != "client" && \

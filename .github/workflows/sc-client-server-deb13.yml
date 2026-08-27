@@ -16,6 +16,7 @@ on:
       - 'scripts/**'
       - 'configs/**'
       - 'tests/**'
+      - 'testbeds/**'
       - 'topologies/**'
       - 'setup.py'
       - 'build.sh'
@@ -186,3 +187,15 @@ jobs:
            "test_switch_ut and not sai_map_list_t"
     - name: Run thift data-driven tests
       run: ./exec.sh --no-tty -i client pytest --testbed=saivs_client_server -v test_l2_basic_dd.py
+
+    - name: Stop SAI-C Redis server
+      run: ./run.sh -i server -c stop -o deb13
+    - name: Start SAI-C server in ZMQ mode
+      run: ./run.sh -i server -s zmq -o deb13
+    - name: Update SAI-C server package
+      run: ./exec.sh -i server --no-tty pip3 install /sai-challenger/common /sai-challenger
+      if: ${{ env.REDIS_SERVER == '0' }}
+    - name: Recreate veth links between client and server dockers
+      run: sudo ./veth-create-host.sh sc-server-trident2-saivs-run sc-client-run
+    - name: Run ZMQ functional test cases
+      run: ./exec.sh --no-tty -i client pytest --testbed=saivs_client_server_zmq -v -k "test_l2_basic"

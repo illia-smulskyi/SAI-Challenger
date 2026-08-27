@@ -1,7 +1,7 @@
 # SAI Challenger
 SAI testing and integration framework for any SAI oriented devices. The main ideas behind SAI-Challenger are:
 - testbed agnostic test cases - test case code does not require any changes for running in any type of environment - HW, emulation, different test equipment, links, servers, etc.;
-- decoupling real SAI RPC implementation from test cases code - test code looks similar for configuring device using Thrift, Redis, etc.;
+- decoupling real SAI RPC implementation from test cases code - test code looks similar for configuring device using Thrift, Redis, ZMQ, etc.;
 - traffic generator agnostic interface - possibility to use both SW and HW traffic generators that support snappi API;
 - fully dockerized environment;
 
@@ -27,7 +27,7 @@ SAI Challenger has many applications. A partial list is below:
 # Use-case scenarios
 SAI Challenger has many configuration options, resulting in numerous permutations of:
 * Physical or virtual DUT testing
-* DUT Configuration APIs - saithrift or sairedis
+* DUT Configuration APIs - saithrift, sairedis (Redis or ZMQ)
 * Dataplane (packet test) - PTF/Scapy or OTG/snappi.
 
 See [Use-Cases README](usecases/README.md) for more details. 

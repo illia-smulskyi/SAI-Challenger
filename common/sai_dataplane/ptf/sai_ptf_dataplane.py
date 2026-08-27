@@ -90,6 +90,7 @@ config_default = {
 class SaiPtfDataPlane(SaiDataPlane, TestCase):
     def __init__(self, cfg=None):
         super().__init__(cfg)
+        self.dataplane = None
 
     def setUp(self):
         assert self.dataplane is not None

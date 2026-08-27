@@ -277,6 +277,9 @@ class Sai():
         self.command_processor.objects_registry = {}
         self.rec2vid = {}
 
+    def deinit(self):
+        self.sai_client.deinit()
+
     def set_loglevel(self, sai_api, loglevel):
         return self.sai_client.set_loglevel(sai_api, loglevel)
 

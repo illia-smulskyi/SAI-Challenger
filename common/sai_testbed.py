@@ -245,6 +245,9 @@ class SaiTestbed():
             for dp in self.dataplane:
                 dp.deinit()
 
+        for asic in self.npu + self.dpu + self.phy:
+            asic.deinit()
+
         for dut in self.dut:
             dut.deinit()
 

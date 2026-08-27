@@ -30,7 +30,7 @@ RUN apt-get -o Acquire::Check-Valid-Until=false update && apt-get install -y \
 RUN pip3 install supervisord-dependent-startup==1.4.0
 
 # Install dependencies
-RUN apt-get install -y redis-server libhiredis1.1.0 python3-redis libc-ares2
+RUN apt-get install -y redis-server libhiredis1.1.0 python3-redis python3-zmq libc-ares2
 
 # Install sonic-swss-common & sonic-sairedis building dependencies
 RUN apt-get install -y \
@@ -126,6 +126,8 @@ WORKDIR /sai-challenger/tests
 # Setup supervisord
 COPY scripts/veth-create.sh    /usr/bin/veth-create.sh
 COPY scripts/redis_start.sh    /usr/bin/redis_start.sh
+COPY scripts/syncd_start.sh    /usr/bin/syncd_custom_start.sh
+COPY configs/context_config.json /etc/sai.d/context_config.json
 COPY configs/supervisord.conf  /etc/supervisor/conf.d/supervisord.conf
 
 CMD ["/usr/bin/supervisord"]
