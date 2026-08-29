@@ -180,6 +180,8 @@ jobs:
       run: ./exec.sh --no-tty -i client pytest --testbed=saivs_client_server -v -k "test_flex_counters"
     - name: Run warm reboot test cases
       run: ./exec.sh --no-tty -i client pytest --testbed=saivs_client_server -v test_warm_reboot.py
+    - name: Run get availability test cases
+      run: ./exec.sh --no-tty -i client pytest --testbed=saivs_client_server -v test_get_availability.py
     - name: Run unit tests
       run: ./exec.sh --no-tty -i client pytest --testbed=saivs_client_server -v ut/test_acl_ut.py ut/test_bridge_ut.py ut/test_vrf_ut.py ut/test_port_ut.py ut/test_fdb_ut.py ut/test_lag_ut.py
     - name: Run unit tests

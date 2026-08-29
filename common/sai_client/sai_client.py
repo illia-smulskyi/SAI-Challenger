@@ -89,6 +89,9 @@ class SaiClient:
     def verify_restore_after_warm_shutdown(self, tout=5):
         raise NotImplementedError
 
+    def get_availability(self, switch_oid, object_type, attrs, do_assert=True):
+        raise NotImplementedError
+
     # Flush FDB
     def flush_fdb_entries(self, obj, attrs=None):
         raise NotImplementedError

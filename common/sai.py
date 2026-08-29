@@ -354,6 +354,9 @@ class Sai():
         self.sai_client.warm_shutdown(tout=warm_tout)
         self.sai_client.verify_restore_after_warm_shutdown(tout=after_warm_tout)
     
+    def get_availability(self, switch_oid, object_type, attrs=None, do_assert=True):
+        return self.sai_client.get_availability(switch_oid, object_type, attrs, do_assert)
+
     # Flush FDB
     def flush_fdb_entries(self, obj, attrs=None):
         self.sai_client.flush_fdb_entries(obj, attrs)

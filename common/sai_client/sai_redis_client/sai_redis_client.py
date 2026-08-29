@@ -617,6 +617,30 @@ class SaiRedisClient(SaiClient):
         # syncd is running, but it may have not restored state before warm-shutdown
         time.sleep(tout)
 
+    def get_availability(self, switch_oid, object_type, attrs, do_assert=True):
+        assert switch_oid.startswith("oid:")
+        assert self.vid_to_type(switch_oid) == "SAI_OBJECT_TYPE_SWITCH", f"Invalid switch OID {switch_oid}"
+
+        if attrs is None:
+            attrs = []
+        attrs.extend(["SAI_OBJECT_TYPE", object_type])
+        attrs = json.dumps(attrs)
+
+        status = self.operate(switch_oid, attrs, "Sobject_type_get_availability_query")
+        status[2] = status[2].decode("utf-8")
+        
+        if do_assert:
+            assert status[2] == 'SAI_STATUS_SUCCESS', f"get_availability({switch_oid}, {attrs}) --> {status}"
+
+        if status[2] == 'SAI_STATUS_SUCCESS':
+            data = SaiData(status[1].decode("utf-8")).uint32()
+        else:
+            data = None
+
+        if do_assert:
+            return data
+
+        return status[2], data
 
     def flush_fdb_entries(self, obj, attrs=None):
         """

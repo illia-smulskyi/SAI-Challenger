@@ -79,6 +79,8 @@ jobs:
       run: ./exec.sh --no-tty pytest --testbed=saivs_standalone -v -k "test_flex_counters"
     - name: Run warm reboot test cases
       run: ./exec.sh --no-tty pytest --testbed=saivs_standalone -v test_warm_reboot.py
+    - name: Run get availability test cases
+      run: ./exec.sh --no-tty pytest --testbed=saivs_standalone -v test_get_availability.py
     - name: Run sairedis tests
       run: ./exec.sh --no-tty pytest --testbed=saivs_standalone -v -k "test_sairec"
     - name: Run unit tests
@@ -118,6 +120,8 @@ jobs:
       run: ./exec.sh --no-tty -s thrift pytest --testbed=saivs_thrift_standalone -v -k "test_flex_counters"
     - name: Run thrift warm reboot test cases
       run: ./exec.sh --no-tty -s thrift pytest --testbed=saivs_thrift_standalone -v test_warm_reboot.py
+    - name: Run thrift get availability test cases
+      run: ./exec.sh --no-tty -s thrift pytest --testbed=saivs_thrift_standalone -v test_get_availability.py
     - name: Run thrift data-driven tests
       run: ./exec.sh --no-tty -s thrift pytest --testbed=saivs_thrift_standalone -v test_l2_basic_dd.py
     - name: Run thrift unit tests
